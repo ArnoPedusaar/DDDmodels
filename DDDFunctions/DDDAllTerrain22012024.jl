@@ -321,19 +321,19 @@ for Lst in 1:Lty
 end
 
  if(area[1] >0.0)
-  layerUH_P = zeros(NoL,antHorlag[1])
+  layerUH_P = zeros(antHorlag[1], NoL)
  end
  if(area[2] >0.0)
-  layerUH_IP = zeros(NoL,antHorlag[2])  
+  layerUH_IP = zeros(antHorlag[2], NoL)
  end 
  
 for i in 1: NoL 
   for Lst in 1:Lty 
    if(Lst==1) 
-    layerUH_P[i,1:nodaysvector[Lst,i]] .= SingleUH(k[Lst,i], Timeresinsec, Ltymid[Lst], Ltymax[Lst], Ltyz[Lst])
+    layerUH_P[1:nodaysvector[Lst,i], i] .= SingleUH(k[Lst,i], Timeresinsec, Ltymid[Lst], Ltymax[Lst], Ltyz[Lst])
    end
    if(Lst==2) 
-    layerUH_IP[i,1:nodaysvector[Lst,i]] .= SingleUH(k[Lst,i], Timeresinsec, Ltymid[Lst], Ltymax[Lst], Ltyz[Lst])
+    layerUH_IP[1:nodaysvector[Lst,i], i] .= SingleUH(k[Lst,i], Timeresinsec, Ltymid[Lst], Ltymax[Lst], Ltyz[Lst])
    end
   end
 end
@@ -364,12 +364,12 @@ QRivxOF = zeros(noDT)
 
 #Groundwater layers; 2dim levels, 1 fastest, NoL slowest#
 if(area[1] >0.0)
-  LayersP = zeros(NoL,antHorlag[1])
+  LayersP = zeros(antHorlag[1], NoL)
  end
 if(area[2] > 0.0)
-  LayersIP = zeros(NoL,antHorlag[2]) 
+  LayersIP = zeros(antHorlag[2], NoL) 
 else
-  LayersIP =zeros(NoL,1)
+  LayersIP =zeros(1, NoL)
 end 
 
 BogLayers = zeros(antBogsteps) # no vertical dimension
@@ -673,12 +673,12 @@ for i in startsim:days
      if(ddist[Lst,1]*outx[Lst] > 0)# overland flow for LST =1 (P) is confirmed for this event
       
       if(Lst==1)
-        layerUH_P[1, 1:nodaysvector[1,1]] = OverlandFlowDynamicDD(k[Lst,1:NoL],ddist[Lst,1:NoL],outx[Lst], layerUH_P,
+        layerUH_P[1:nodaysvector[1,1], 1] = OverlandFlowDynamicDD(k[Lst,1:NoL],ddist[Lst,1:NoL],outx[Lst], layerUH_P,
                     nodaysvector[Lst,1:NoL],NoL, Ltymid[Lst], CritFlux[Lst], Timeresinsec)
        end              
        if(Lst==2)
          if(area[2] > 0.0)
-           layerUH_IP[1, 1:nodaysvector[2,1]] = OverlandFlowDynamicDD(k[Lst,],ddist[Lst,],outx[Lst], layerUH_IP,
+           layerUH_IP[1:nodaysvector[2,1], 1] = OverlandFlowDynamicDD(k[Lst,],ddist[Lst,],outx[Lst], layerUH_IP,
                     nodaysvector[Lst,1:NoL],NoL, Ltymid[Lst], CritFlux[Lst], Timeresinsec)
          end
        end
@@ -700,10 +700,10 @@ for i in startsim:days
   #GDT_P = sum(LayersP[1:NoL,1]) + sum(ddist[1,1:NoL] .* outx[1] .* layerUH_P[1:NoL,1])      #groundwater to be discharged into the rivernetwork + this timesteps contribution
   #GDT_IP = sum(LayersIP[1:NoL,1]) + sum(ddist[2,1:NoL] .* outx[2] .* layerUH_IP[1:NoL,1])   #groundwater to be discharged into the rivernetwork 
   if(area[1] >0.0)
-    GDT_P = sum(LayersP[1:NoL,1]) + sum(ddist[1,1:NoL] .* outx[1] .* layerUH_P[1:NoL,1])      #groundwater to be discharged into the rivernetwork + this timesteps contribution
+    GDT_P = sum(LayersP[1,1:NoL]) + sum(ddist[1,1:NoL] .* outx[1] .* layerUH_P[1, 1:NoL])      #groundwater to be discharged into the rivernetwork + this timesteps contribution
   end
   if(area[2] > 0.0)
-    GDT_IP = sum(LayersIP[1:NoL,1]) + sum(ddist[2,1:NoL] .* outx[2] .* layerUH_IP[1:NoL,1])   #groundwater to be discharged into the rivernetwork 
+    GDT_IP = sum(LayersIP[1,1:NoL]) + sum(ddist[2,1:NoL] .* outx[2] .* layerUH_IP[1, 1:NoL])   #groundwater to be discharged into the rivernetwork 
   end 
   if(area[3] > 0.0)
    GDT_Bog =  BogLayers[1]+outbog*UHbog[1]         #bogwater to be discharged into the rivernetwork + this timesteps contribution
@@ -734,11 +734,11 @@ for i in startsim:days
     for Lst in 1:Lty
       if(Lst == 1)
          lyrs[Lst] = sum(LayersP)
-         subsurface[Lst] = sum(LayersP[2:5,1:antHorlag[1]]) # gives the sum of layers after todays runoff has taken place
+         subsurface[Lst] = sum(LayersP[1:antHorlag[1],2:5]) # gives the sum of layers after todays runoff has taken place
       end
       if(Lst==2)
          lyrs[Lst] = sum(LayersIP)
-         subsurface[Lst] = sum(LayersIP[2:5,1:antHorlag[2]])
+         subsurface[Lst] = sum(LayersIP[1:antHorlag[2],2:5])
       end
     end
   
@@ -748,10 +748,10 @@ for i in startsim:days
   #reinstate original overland flow layer          
   for Lst in 1:Lty 
     if(Lst==1) 
-     layerUH_P[1,1:nodaysvector[Lst,1]] .= SingleUH(k[Lst,1], Timeresinsec, Ltymid[Lst], Ltymax[Lst], Ltyz[Lst])
+     layerUH_P[1:nodaysvector[Lst,1], 1] .= SingleUH(k[Lst,1], Timeresinsec, Ltymid[Lst], Ltymax[Lst], Ltyz[Lst])
     end
     if(Lst==2) 
-     layerUH_IP[1,1:nodaysvector[Lst,1]] .= SingleUH(k[Lst,1], Timeresinsec, Ltymid[Lst], Ltymax[Lst], Ltyz[Lst])
+     layerUH_IP[1:nodaysvector[Lst,1], 1] .= SingleUH(k[Lst,1], Timeresinsec, Ltymid[Lst], Ltymax[Lst], Ltyz[Lst])
     end
   end
 

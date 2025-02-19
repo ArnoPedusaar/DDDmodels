@@ -18,15 +18,15 @@ function LayerUpdate(ddist, outx, Layers, layerUH, nodaysvector, NoL)
         
   for j in 1 : NoL
     qlayer = zeros(nodaysvector[j])    
-    qlayer .= ddist[j]*outx .* layerUH[j,1:nodaysvector[j]]    #finds response  in mm!!!!  for the actual layer, en vektor     
+    qlayer .= ddist[j]*outx .* layerUH[1:nodaysvector[j], j]    #finds response  in mm!!!!  for the actual layer, en vektor
         
     if(nodaysvector[j] > 1)
-      Layers[j,(1:(nodaysvector[j]-1))] .= Layers[j,2:nodaysvector[j]] .+ qlayer[2:nodaysvector[j]]# flytter the level of the matrix one timestep ahead
-      Layers[j,nodaysvector[j]] = 0.0       
+      Layers[(1:(nodaysvector[j]-1)),j] .= Layers[2:nodaysvector[j],j] .+ qlayer[2:nodaysvector[j]]# flytter the level of the matrix one timestep ahead
+      Layers[nodaysvector[j],j] = 0.0
     end 
 
     if(nodaysvector[j] == 1)
-      Layers[j,1:nodaysvector[j]] .= qlayer[1:nodaysvector[j]]
+      Layers[1:nodaysvector[j],j] .= qlayer[1:nodaysvector[j]]
     end
   end
 

@@ -15,7 +15,7 @@ aktMag = zeros(Float64,NoL)
 #Below are the states (in mm) for each saturation level
 for j in reverse(1:NoL)
                                       #state after this timesteps' water is gone. amount of water  in mm, minus current timestep
-  aktMag[j] = sum(Layers[j,2:nodaysvector[j]])
+  aktMag[j] = sum(Layers[2:nodaysvector[j],j])
 
   if (aktMag[j] < Magkap[j])
    ddistx[j] = Magkap[j] - aktMag[j]
