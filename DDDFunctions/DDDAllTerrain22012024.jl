@@ -155,9 +155,8 @@ NoL = Int(prm.val[30])                # Number of layers in subsurface including
 R = prm.val[31]                  # soil moisture content/100 for field capacity of soils 
 
 #Celerities, subsurface and conduits
-GshInt = prm.val[32]        # shapeparameter saturation Capital lambda
-GscInt = tprm[6] #prm.val[33]        # scaleparameter saturation Capital lambda
-Gshape, Gscale = Big2SmallLambda(GshInt, GscInt) # Coverting integrated celerity to layers 
+GshInt = [prm.val[32], prm.val[76]]        # shapeparameter saturation Capital lambda
+GscInt = [tprm[6],  prm.val[77]]  #prm.val[33]        # scaleparameter saturation Capital lambda
 OFVP  = tprm[7]  #prm.val[34]         # Overland flow velocity P
 OFVIP = tprm[8]  #prm.val[35]                  # Overland flow velocity IP
 Lv = tprm[9]     #prm.val[36]                     # lake celrity [m/s] Can it be fixed?, 0.01 is popular
@@ -287,10 +286,14 @@ swgt[2,1:hson] .= 0.1   # 1 .* elevarea/(totarea)          # sums to 1, correcte
 
 #Subsurface celerities 
 for Lst in 1:Lty
-    k[Lst,1:NoL] = CeleritySubSurface(NoL, Gshape, Gscale, Ltymid[Lst], Timeresinsec) # Celerity of subsurface (and overland) flow
+   Gshape, Gscale = Big2SmallLambda(GshInt[Lst], GscInt[Lst]) # Coverting integrated celerity to layers
+
+   k[Lst,1:NoL] = CeleritySubSurface(NoL, Gshape, Gscale, Ltymid[Lst], Timeresinsec) # Celerity of subsurface (and overland) flow
+
    if(Lst==1)
     k[Lst,1] = OFVP  # P m/s Holden et al. WRR,2008,  # Overland flow celerites P
    end
+
    if(Lst==2)
     k[Lst,1] = OFVIP # IP, Sedyowati et al. 2017      # Overland flow celerites IP
    end 
@@ -381,7 +384,7 @@ OF_LakeLayers = zeros(nodaysLake) # no vertical dimension
 
 for Lst in 1: Lty
   if(area[Lst]>0.0)
-  Magkap[Lst,1:NoL], M[Lst] = LayerEstimation(GshInt,GscInt,Timeresinsec,Ltymax[Lst],Ltymid[Lst], 
+  Magkap[Lst,1:NoL], M[Lst] = LayerEstimation(GshInt[Lst], GscInt[Lst], Timeresinsec, Ltymax[Lst], Ltymid[Lst], 
         Ltyfrac[Lst]*MAD, Ltyfrac[Lst]*totarea, NoL, gtcel) 
   end   
 end
